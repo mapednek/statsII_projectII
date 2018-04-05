@@ -76,3 +76,31 @@ adult$global_region[adult$native_country %in% united_states] <- "united_states"
 adult$global_region[adult$native_country == " Canada"] <- "canada"
 adult$global_region[adult$native_country == " South"] <- "country_labeled_as_south"
 adult$global_region <- as.factor(adult$global_region)
+
+
+# IV. look at capital gains and loses
+non_zero_capital_gains_subset = subset(adult, adult$capital_gain != 0)
+non_zero_capital_loss_subset = subset(adult, adult$capital_loss != 0)
+
+summary_gain <- summary(non_zero_capital_gains_subset$capital_gain)
+gain_low_cutoff <- as.integer(summary_gain[[2]])
+gain_high_cutoff <- as.integer(summary_gain[[5]])
+
+adult$capital_gain_category[adult$capital_gain == 0] <- "zero"
+adult$capital_gain_category[adult$capital_gain > 0 & adult$capital_gain <= gain_low_cutoff] <- "low"
+adult$capital_gain_category[adult$capital_gain > gain_low_cutoff & adult$capital_gain <= gain_high_cutoff] <- "medium"
+adult$capital_gain_category[adult$capital_gain > gain_high_cutoff] <- "high"
+adult$capital_gain_category <- factor(adult$capital_gain_category, ordered=TRUE, levels=c("zero", "low", "medium", "high"))
+
+summary_loss <- summary(non_zero_capital_loss_subset$capital_loss)
+loss_low_cutoff <- as.integer(summary_loss[[2]])
+loss_high_cutoff <- as.integer(summary_loss[[5]])
+
+adult$capital_loss_category[adult$capital_loss == 0] <- "zero"
+adult$capital_loss_category[adult$capital_loss > 0 & adult$capital_loss <= loss_low_cutoff] <- "low"
+adult$capital_loss_category[adult$capital_loss > loss_low_cutoff & adult$capital_loss <= loss_high_cutoff] <- "medium"
+adult$capital_loss_category[adult$capital_loss > loss_high_cutoff] <- "high"
+adult$capital_loss_category <- factor(adult$capital_loss_category, ordered=TRUE, levels=c("zero", "low", "medium", "high"))
+
+
+
