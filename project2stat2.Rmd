@@ -1,25 +1,18 @@
 ---
 title: "Stat II Project 2"
-author: "Manisha Pendekar, Mihir Parikh"
+author: "Manisha Pendekar"
 date: "April 18, 2018"
-output:
-  html_document:
-    keep_md: true
+output: html_document
 ---
-
-```{r libraries, include=TRUE, message=FALSE, warning=FALSE}
+#Import data
+```{r echo = TRUE}
 library(tigerstats)
 library(sqldf)
 library(ggplot2)
-library(nnet)
-library(ROCR)
-```
-
-#Import data
-```{r echo = TRUE}
 trainDf <- read.csv("train.csv", header = TRUE)
 testDf <- read.csv("test.csv", header = TRUE)
 summary(trainDf)
+
 ```
 
 # EDA of Variables of Interest
@@ -185,6 +178,10 @@ xtabs(~income+global_region, data = trainDf3)
 ###Logistic regression
 
 ```{r echo = TRUE}
+#install.packages("nnet")
+library(nnet)
+#install.packages("ROCR")
+library(ROCR)
 trainDf3$income<-ifelse(trainDf3$income=='>50K',1,0)
 testDf2$income<-ifelse(testDf2$income=='>50K',1,0)
 mymodel<- multinom(income~., data = trainDf3)
@@ -212,6 +209,17 @@ predProb <- predict(mymodel, trainDf3, type = "prob")
 #hist(predProb)
 head(predProb)
 head(trainDf3)
+
+
+###### Confusion Matrix and Misclassification Rate on Train
+confMatrix <- predict(mymodel, trainDf3)
+
+tab <- table(confMatrix, trainDf3$income)
+tab ### this print confsion matrix
+#### Misclassification Rate
+1-sum(diag(tab))/sum(tab)
+
+
 
 predProb <- prediction(predProb, trainDf3$income)
 perfEval <- performance(predProb, "acc")
@@ -249,6 +257,15 @@ predProbTst <- predict(myTstmodel, testDf2, type = "prob")
 #see whether predProb(prediction Probalbilties) matches with actual data and it does for atleast first 6 obs
 head(predProbTst)
 head(testDf2)
+
+#Confusion Matrix and Misclassification Rate of test
+confMatrixTst <- predict(myTstmodel, testDf2)
+
+tabTst <- table(confMatrixTst, testDf2$income) 
+tabTst ### this prints confsion matrix
+#### Misclassification Rate
+1-sum(diag(tabTst))/sum(tabTst)
+
 
 predProbTst <- prediction(predProbTst, testDf2$income)
 perfEvalTst <- performance(predProbTst, "acc")
